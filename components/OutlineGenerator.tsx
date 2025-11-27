@@ -14,7 +14,7 @@ const i18n = {
   'zh-CN': {
     title: '多语言 AI 文章大纲生成器',
     placeholder: '请输入文章标题，例如：如何快速做副业',
-    selectLanguage: '选择语言',
+    selectLanguage: '操作语言',
     button: '生成大纲',
     loading: '生成中...',
     errorEmpty: '请输入标题',
@@ -24,7 +24,7 @@ const i18n = {
   'zh-TW': {
     title: '多語言 AI 文章大綱產生器',
     placeholder: '請輸入文章標題，例如：如何快速做副業',
-    selectLanguage: '選擇語言',
+    selectLanguage: '操作語言',
     button: '生成大綱',
     loading: '生成中...',
     errorEmpty: '請輸入標題',
@@ -34,7 +34,7 @@ const i18n = {
   en: {
     title: 'Multi-language AI Outline Generator',
     placeholder: 'Enter article title, e.g. How to start a side hustle',
-    selectLanguage: 'Select Language',
+    selectLanguage: 'UI Language',
     button: 'Generate Outline',
     loading: 'Generating...',
     errorEmpty: 'Please enter a title',
@@ -42,10 +42,10 @@ const i18n = {
     errorCall: 'API call failed. Check your API Key and network',
   },
   fr: {
-    title: "Générateur de plan d'article IA multilingue",
-    placeholder: "Entrez le titre de l'article, ex : Comment lancer un side business",
-    selectLanguage: 'Choisir la langue',
-    button: 'Générer un plan',
+    title: "Générateur de plans IA multilingue",
+    placeholder: "Entrez le titre de l'article, ex : Comment démarrer un business",
+    selectLanguage: 'Langue de l’interface',
+    button: 'Générer le plan',
     loading: 'Génération...',
     errorEmpty: 'Veuillez entrer un titre',
     errorFail: 'Échec de la génération. Réessayez plus tard',
@@ -54,7 +54,7 @@ const i18n = {
   es: {
     title: 'Generador de esquemas IA multilingüe',
     placeholder: 'Ingrese el título del artículo, ej: Cómo iniciar un ingreso extra',
-    selectLanguage: 'Selecciona el idioma',
+    selectLanguage: 'Idioma de la interfaz',
     button: 'Generar esquema',
     loading: 'Generando...',
     errorEmpty: 'Por favor ingresa un título',
@@ -65,7 +65,7 @@ const i18n = {
 
 function OutlineGenerator() {
   const [title, setTitle] = useState('');
-  const [language, setLanguage] = useState('zh-CN');
+  const [language, setLanguage] = useState('en');
   const [outline, setOutline] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -75,60 +75,15 @@ function OutlineGenerator() {
   const getPromptByLanguage = (lang, title) => {
     switch (lang) {
       case 'en':
-        return `You are a content strategist. Based on the title below, generate a 5-point outline. Each point should be a clear sentence for article or video script creation.
-
-Title: ${title}
-
-Format:
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...`;
+        return `You are a content strategist. Based on the title below, generate a 5-point outline. Each point should be a clear sentence for article or video script creation.\n\nTitle: ${title}\n\nFormat:\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...`;
       case 'fr':
-        return `Vous êtes un expert en stratégie de contenu. À partir du titre ci-dessous, générez un plan en 5 points. Chaque point doit être une phrase claire adaptée à un article ou à un script vidéo.
-
-Titre : ${title}
-
-Format :
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...`;
+        return `Vous êtes un expert en stratégie de contenu. À partir du titre ci-dessous, générez un plan en 5 points.\n\nTitre : ${title}\n\nFormat :\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...`;
       case 'es':
-        return `Eres un experto en estrategias de contenido. Con base en el siguiente título, genera un esquema de 5 puntos. Cada punto debe ser una frase clara para un artículo o guion de video.
-
-Título: ${title}
-
-Formato:
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...`;
+        return `Eres un experto en estrategias de contenido. Con base en el siguiente título, genera un esquema de 5 puntos.\n\nTítulo: ${title}\n\nFormato:\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...`;
       case 'zh-TW':
-        return `你是一位內容策略專家。請根據以下標題產出 5 點式的大綱，每點一句話，適合用於寫文章或影片腳本。
-
-標題：${title}
-
-格式：
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...`;
+        return `你是一位內容策略專家。請根據以下標題產出 5 點式的大綱。\n\n標題：${title}\n\n格式：\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...`;
       default:
-        return `你是一位内容运营专家。请根据下面的标题，生成一份 5 点式的内容大纲，每一点用一句话概括，适合用于写文章或制作视频脚本。
-
-标题：${title}
-
-输出格式：
-1. ...
-2. ...
-3. ...
-4. ...
-5. ...`;
+        return `你是一位内容运营专家。请根据下面的标题生成一份 5 点式的大纲。\n\n标题：${title}\n\n格式：\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...`;
     }
   };
 
@@ -143,7 +98,7 @@ Formato:
     setError('');
 
     try {
-      const apiKey = 'sk-8d928cfbd699402eae553b5263e81a9e'; // 替换为你的 API Key
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
       const prompt = getPromptByLanguage(language, title);
 
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -179,14 +134,12 @@ Formato:
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <h1 className="text-2xl font-bold mb-4 text-center text-gray-800">{t.title}</h1>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t.selectLanguage}：</label>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md"
+          className="border rounded px-2 py-1 text-sm"
         >
           {languages.map((lang) => (
             <option key={lang.code} value={lang.code}>
