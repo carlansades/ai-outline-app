@@ -14,7 +14,7 @@ const languages = [
 
 type LangCode = typeof languages[number]['code'];
 
-// 文案字典（页面标题、分组标题、工具名等多语言）
+// 多语言文案
 const i18n: Record<LangCode, {
   title: string;
   toolListTitle: string;
@@ -26,11 +26,11 @@ const i18n: Record<LangCode, {
     toolListTitle: '选择工具',
     languageTitle: '选择语言',
     tools: {
-      OutlineGenerator: '大纲生成器',
-      CodeReview: '代码审查',
-      CoderGenerator: '代码生成器',
-      UnitTestGenerator: '单元测试生成器',
-      LanguageTranslator: '语言翻译器',
+      CoderGenerator: 'AI写代码',
+      UnitTestGenerator: 'AI单元测试',
+      CodeReview: 'AI代码审查',
+      LanguageTranslator: 'AI翻译',
+      OutlineGenerator: 'AI内容运营',
     },
   },
   'zh-TW': {
@@ -38,11 +38,11 @@ const i18n: Record<LangCode, {
     toolListTitle: '選擇工具',
     languageTitle: '選擇語言',
     tools: {
-      OutlineGenerator: '大綱產生器',
-      CodeReview: '程式碼審查',
-      CoderGenerator: '程式碼產生器',
-      UnitTestGenerator: '單元測試產生器',
-      LanguageTranslator: '語言翻譯器',
+      CoderGenerator: 'AI寫程式',
+      UnitTestGenerator: 'AI單元測試',
+      CodeReview: 'AI程式碼審查',
+      LanguageTranslator: 'AI翻譯',
+      OutlineGenerator: 'AI內容營運',
     },
   },
   en: {
@@ -50,11 +50,11 @@ const i18n: Record<LangCode, {
     toolListTitle: 'Choose a Tool',
     languageTitle: 'Select Language',
     tools: {
-      OutlineGenerator: 'Outline Generator',
-      CodeReview: 'Code Review',
-      CoderGenerator: 'Coder Generator',
-      UnitTestGenerator: 'Unit Test Generator',
-      LanguageTranslator: 'Language Translator',
+      CoderGenerator: 'AI Code Writer',
+      UnitTestGenerator: 'AI Unit Test',
+      CodeReview: 'AI Code Review',
+      LanguageTranslator: 'AI Translator',
+      OutlineGenerator: 'AI Content Generator',
     },
   },
   fr: {
@@ -62,11 +62,11 @@ const i18n: Record<LangCode, {
     toolListTitle: 'Choisissez un outil',
     languageTitle: 'Choisir la langue',
     tools: {
-      OutlineGenerator: 'Générateur de plan',
-      CodeReview: 'Revue de code',
-      CoderGenerator: 'Générateur de code',
-      UnitTestGenerator: 'Générateur de tests',
-      LanguageTranslator: 'Traducteur de langue',
+      CoderGenerator: 'Écriture de code IA',
+      UnitTestGenerator: 'Test unitaire IA',
+      CodeReview: 'Revue de code IA',
+      LanguageTranslator: 'Traducteur IA',
+      OutlineGenerator: 'Marketing de contenu IA',
     },
   },
   es: {
@@ -74,26 +74,26 @@ const i18n: Record<LangCode, {
     toolListTitle: 'Elegir herramienta',
     languageTitle: 'Seleccionar idioma',
     tools: {
-      OutlineGenerator: 'Generador de esquemas',
-      CodeReview: 'Revisión de código',
-      CoderGenerator: 'Generador de código',
-      UnitTestGenerator: 'Generador de pruebas',
-      LanguageTranslator: 'Traductor de idiomas',
+      CoderGenerator: 'IA para escribir código',
+      UnitTestGenerator: 'IA para pruebas unitarias',
+      CodeReview: 'IA para revisión de código',
+      LanguageTranslator: 'Traductor de IA',
+      OutlineGenerator: 'IA para contenido',
     },
   },
 };
 
-// 页面配置
+// 修改后的顺序
 const pages = [
-  { path: 'OutlineGenerator' },
-  { path: 'CodeReview' },
   { path: 'CoderGenerator' },
   { path: 'UnitTestGenerator' },
+  { path: 'CodeReview' },
   { path: 'LanguageTranslator' },
+  { path: 'OutlineGenerator' },
 ];
 
 export default function Home() {
-  const [lang, setLang] = useState<LangCode>('zh-CN');
+  const [lang, setLang] = useState<LangCode>('en');
   const t = i18n[lang];
 
   return (

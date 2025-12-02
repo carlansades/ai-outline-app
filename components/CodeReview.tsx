@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react';
 
-const uiLanguages = [
+type UILanguage = {
+  code: string;
+  label: string;
+};
+
+const uiLanguages: UILanguage[] = [
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
@@ -22,7 +27,19 @@ const codeLanguages = [
   'Ruby',
 ];
 
-const i18n = {
+type I18nText = {
+  title: string;
+  placeholder: string;
+  selectLanguage: string;
+  selectCodeLang: string;
+  button: string;
+  loading: string;
+  errorEmpty: string;
+  errorFail: string;
+  errorCall: string;
+};
+
+const i18n: Record<string, I18nText> = {
   'zh-CN': {
     title: 'AI 重构与代码审查助手',
     placeholder: '请输入你想审查的代码，例如一个模块或函数',
@@ -81,16 +98,16 @@ const i18n = {
 };
 
 function CodeReview() {
-  const [language, setLanguage] = useState('en');
-  const [codeLang, setCodeLang] = useState('Python');
-  const [inputCode, setInputCode] = useState('');
-  const [reviewOutput, setReviewOutput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [language, setLanguage] = useState<string>('en');
+  const [codeLang, setCodeLang] = useState<string>('Python');
+  const [inputCode, setInputCode] = useState<string>('');
+  const [reviewOutput, setReviewOutput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const t = i18n[language];
 
-  const generatePrompt = (code, lang) => {
+  const generatePrompt = (code: string, lang: string): string => {
     return `You are a senior ${lang} developer and code reviewer. 
 Please review the following code and provide:
 - Suggestions for refactoring
@@ -125,8 +142,14 @@ Respond only with the code review and improvement suggestions in markdown format
         body: JSON.stringify({
           model: 'deepseek-coder',
           messages: [
-            { role: 'system', content: 'You are a helpful assistant that reviews and refactors code.' },
-            { role: 'user', content: prompt },
+            {
+              role: 'system',
+              content: 'You are a helpful assistant that reviews and refactors code.',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
           ],
           temperature: 0.3,
         }),
@@ -149,58 +172,68 @@ Respond only with the code review and improvement suggestions in markdown format
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="border rounded px-2 py-1 text-sm"
-        >
-          {uiLanguages.map((lang) => (
-            <option key={lang.code} value={lang.code}>{lang.label}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t.selectCodeLang}
-        </label>
-        <select
-          value={codeLang}
-          onChange={(e) => setCodeLang(e.target.value)}
-          className="w-full border p-2 rounded"
-        >
-          {codeLanguages.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
-        </select>
-      </div>
-
-      <textarea
-        rows={8}
-        value={inputCode}
-        onChange={(e) => setInputCode(e.target.value)}
-        placeholder={t.placeholder}
-        className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-      <button
-        onClick={generateReview}
-        disabled={loading}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        {loading ? t.loading : t.button}
-      </button>
-
-      {reviewOutput && (
-        <div className="mt-6 bg-gray-100 p-4 rounded text-sm text-gray-800 border border-gray-300 prose prose-sm max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: reviewOutput.replace(/\n/g, '<br />') }} />
+    <div className="w-full max-w-3xl mx-auto mt-6 px-4 sm:px-6">
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
+          <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            {uiLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t.selectCodeLang}
+          </label>
+          <select
+            value={codeLang}
+            onChange={(e) => setCodeLang(e.target.value)}
+            className="w-full border p-2 rounded text-sm"
+          >
+            {codeLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <textarea
+          rows={8}
+          value={inputCode}
+          onChange={(e) => setInputCode(e.target.value)}
+          placeholder={t.placeholder}
+          className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        />
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={generateReview}
+          disabled={loading}
+          className="mt-4 w-full bg-blue-600 text-white py-2 rounded text-center text-sm font-semibold hover:bg-blue-700 transition"
+        >
+          {loading ? t.loading : t.button}
+        </button>
+
+        {reviewOutput && (
+          <div className="mt-6 bg-gray-100 p-4 rounded text-gray-800 border border-gray-300 prose prose-sm max-w-none overflow-x-auto">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: reviewOutput.replace(/\n/g, '<br />'),
+              }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

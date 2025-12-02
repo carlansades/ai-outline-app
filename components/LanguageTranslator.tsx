@@ -2,7 +2,25 @@
 
 import React, { useState } from 'react';
 
-const languages = [
+type LanguageItem = {
+  code: string;
+  label: string;
+};
+
+type I18nText = {
+  title: string;
+  placeholder: string;
+  selectLanguage: string;
+  selectUILanguage: string;
+  button: string;
+  loading: string;
+  errorEmpty: string;
+  errorNoTarget: string;
+  errorFail: string;
+  errorCall: string;
+};
+
+const languages: LanguageItem[] = [
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
@@ -10,7 +28,7 @@ const languages = [
   { code: 'es', label: 'Español' },
 ];
 
-const i18n = {
+const i18n: Record<string, I18nText> = {
   'zh-CN': {
     title: 'AI 多语言翻译器',
     placeholder: '请输入要翻译的内容，例如：你好，世界！',
@@ -73,7 +91,7 @@ const i18n = {
   },
 };
 
-function Translator() {
+function LanguageTranslator() {
   const [text, setText] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['en']);
   const [uiLanguage, setUiLanguage] = useState('en');
@@ -151,71 +169,75 @@ function Translator() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
-        <select
-          value={uiLanguage}
-          onChange={(e) => setUiLanguage(e.target.value)}
-          className="border border-gray-300 rounded p-1 text-sm"
+    <div className="w-full max-w-3xl mx-auto px-4 py-6 sm:px-6">
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
+          <select
+            value={uiLanguage}
+            onChange={(e) => setUiLanguage(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 text-sm"
+          >
+            {languages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t.selectLanguage}：</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {languages.map((lang) => (
+              <label key={lang.code} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedLanguages.includes(lang.code)}
+                  onChange={() => handleLanguageToggle(lang.code)}
+                />
+                <span>{lang.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <textarea
+          rows={4}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={t.placeholder}
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+        />
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={handleTranslate}
+          disabled={loading}
+          className="mt-4 w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition"
         >
-          {languages.map((lang) => (
-            <option key={lang.code} value={lang.code}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+          {loading ? t.loading : t.button}
+        </button>
+
+        {Object.keys(translations).length > 0 && (
+          <div className="mt-6 space-y-4">
+            {selectedLanguages.map((lang) => (
+              <div
+                key={lang}
+                className="bg-gray-50 p-4 rounded border border-gray-200 text-gray-800 text-sm overflow-x-auto whitespace-pre-wrap"
+              >
+                <p className="font-semibold mb-2">
+                  {languages.find((l) => l.code === lang)?.label}：
+                </p>
+                <p>{translations[lang]}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t.selectLanguage}：</label>
-        <div className="grid grid-cols-2 gap-2">
-          {languages.map((lang) => (
-            <label key={lang.code} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={selectedLanguages.includes(lang.code)}
-                onChange={() => handleLanguageToggle(lang.code)}
-              />
-              <span>{lang.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <textarea
-        rows={4}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder={t.placeholder}
-        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-      />
-
-      {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
-
-      <button
-        onClick={handleTranslate}
-        disabled={loading}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        {loading ? t.loading : t.button}
-      </button>
-
-      {Object.keys(translations).length > 0 && (
-        <div className="mt-6 space-y-4">
-          {selectedLanguages.map((lang) => (
-            <div
-              key={lang}
-              className="whitespace-pre-wrap bg-gray-50 p-4 rounded border border-gray-200 text-gray-800"
-            >
-              <p className="font-semibold mb-2">{languages.find((l) => l.code === lang)?.label}：</p>
-              <p>{translations[lang]}</p>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
 
-export default Translator;
+export default LanguageTranslator;

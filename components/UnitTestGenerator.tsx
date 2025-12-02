@@ -2,7 +2,24 @@
 
 import React, { useState } from 'react';
 
-const uiLanguages = [
+type LanguageOption = {
+  code: string;
+  label: string;
+};
+
+type I18nText = {
+  title: string;
+  placeholder: string;
+  selectLanguage: string;
+  selectCodeLang: string;
+  button: string;
+  loading: string;
+  errorEmpty: string;
+  errorFail: string;
+  errorCall: string;
+};
+
+const uiLanguages: LanguageOption[] = [
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
@@ -10,7 +27,7 @@ const uiLanguages = [
   { code: 'es', label: 'Español' },
 ];
 
-const codeLanguages = [
+const codeLanguages: string[] = [
   'Python',
   'JavaScript',
   'TypeScript',
@@ -22,7 +39,7 @@ const codeLanguages = [
   'Ruby',
 ];
 
-const i18n = {
+const i18n: Record<string, I18nText> = {
   'zh-CN': {
     title: 'AI 单元测试生成器',
     placeholder: '请输入你要测试的代码，例如一个函数实现',
@@ -90,7 +107,7 @@ function UnitTestGenerator() {
 
   const t = i18n[language];
 
-  const generatePrompt = (code, lang) => {
+  const generatePrompt = (code: string, lang: string): string => {
     return `You are a senior ${lang} developer. Given the following code, generate comprehensive unit tests using best practices.\n\nCode:\n${code}\n\nOnly output test code. No explanation.`;
   };
 
@@ -117,8 +134,14 @@ function UnitTestGenerator() {
         body: JSON.stringify({
           model: 'deepseek-coder',
           messages: [
-            { role: 'system', content: 'You are a helpful AI that writes unit tests for any code.' },
-            { role: 'user', content: prompt },
+            {
+              role: 'system',
+              content: 'You are a helpful AI that writes unit tests for any code.',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
           ],
           temperature: 0.2,
         }),
@@ -141,58 +164,64 @@ function UnitTestGenerator() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="border rounded px-2 py-1 text-sm"
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+          <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 text-sm"
+          >
+            {uiLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t.selectCodeLang}
+          </label>
+          <select
+            value={codeLang}
+            onChange={(e) => setCodeLang(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+          >
+            {codeLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <textarea
+          rows={8}
+          value={inputCode}
+          onChange={(e) => setInputCode(e.target.value)}
+          placeholder={t.placeholder}
+          className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        />
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={generateUnitTest}
+          disabled={loading}
+          className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition text-sm font-semibold"
         >
-          {uiLanguages.map((lang) => (
-            <option key={lang.code} value={lang.code}>{lang.label}</option>
-          ))}
-        </select>
+          {loading ? t.loading : t.button}
+        </button>
+
+        {testCode && (
+          <pre className="mt-6 bg-gray-100 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap text-gray-800 border border-gray-300">
+            <code>{testCode}</code>
+          </pre>
+        )}
       </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t.selectCodeLang}
-        </label>
-        <select
-          value={codeLang}
-          onChange={(e) => setCodeLang(e.target.value)}
-          className="w-full border p-2 rounded"
-        >
-          {codeLanguages.map((lang) => (
-            <option key={lang} value={lang}>{lang}</option>
-          ))}
-        </select>
-      </div>
-
-      <textarea
-        rows={8}
-        value={inputCode}
-        onChange={(e) => setInputCode(e.target.value)}
-        placeholder={t.placeholder}
-        className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-      <button
-        onClick={generateUnitTest}
-        disabled={loading}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        {loading ? t.loading : t.button}
-      </button>
-
-      {testCode && (
-        <pre className="mt-6 bg-gray-100 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap text-gray-800 border border-gray-300">
-          <code>{testCode}</code>
-        </pre>
-      )}
     </div>
   );
 }

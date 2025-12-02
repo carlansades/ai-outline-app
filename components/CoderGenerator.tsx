@@ -2,7 +2,24 @@
 
 import React, { useState } from 'react';
 
-const uiLanguages = [
+type UILanguage = {
+  code: string;
+  label: string;
+};
+
+type I18nText = {
+  title: string;
+  placeholder: string;
+  selectLanguage: string;
+  selectCodeLang: string;
+  button: string;
+  loading: string;
+  errorEmpty: string;
+  errorFail: string;
+  errorCall: string;
+};
+
+const uiLanguages: UILanguage[] = [
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
@@ -10,7 +27,7 @@ const uiLanguages = [
   { code: 'es', label: 'Español' },
 ];
 
-const codeLanguages = [
+const codeLanguages: string[] = [
   'Python',
   'JavaScript',
   'TypeScript',
@@ -22,7 +39,7 @@ const codeLanguages = [
   'Ruby',
 ];
 
-const i18n = {
+const i18n: Record<string, I18nText> = {
   'zh-CN': {
     title: '多语言 AI 代码生成器',
     placeholder: '请输入你想实现的功能，例如：读取一个 JSON 文件并打印内容',
@@ -81,17 +98,17 @@ const i18n = {
 };
 
 function CodeGenerator() {
-  const [language, setLanguage] = useState('en');
-  const [codeLang, setCodeLang] = useState('Python');
-  const [description, setDescription] = useState('');
-  const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [language, setLanguage] = useState<string>('en');
+  const [codeLang, setCodeLang] = useState<string>('Python');
+  const [description, setDescription] = useState<string>('');
+  const [code, setCode] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const t = i18n[language];
 
-  const generatePrompt = (desc, codeLang) => {
-    return `You are a senior ${codeLang} developer. Write code that does the following:\n\n"${desc}"\n\nOnly return code. No explanation.`;
+  const generatePrompt = (desc: string, lang: string): string => {
+    return `You are a senior ${lang} developer. Write code that does the following:\n\n"${desc}"\n\nOnly return code. No explanation.`;
   };
 
   const generateCode = async () => {
@@ -125,7 +142,7 @@ function CodeGenerator() {
       });
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      const content: string | undefined = data.choices?.[0]?.message?.content;
 
       if (content) {
         setCode(content.trim());
@@ -141,62 +158,64 @@ function CodeGenerator() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="border rounded px-2 py-1 text-sm"
+    <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 mt-6">
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            {uiLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t.selectCodeLang}
+          </label>
+          <select
+            value={codeLang}
+            onChange={(e) => setCodeLang(e.target.value)}
+            className="w-full border p-2 rounded text-sm"
+          >
+            {codeLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <textarea
+          rows={4}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t.placeholder}
+          className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        />
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={generateCode}
+          disabled={loading}
+          className="mt-4 w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition"
         >
-          {uiLanguages.map((lang) => (
-            <option key={lang.code} value={lang.code}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+          {loading ? t.loading : t.button}
+        </button>
+
+        {code && (
+          <pre className="mt-6 bg-gray-100 p-4 rounded text-sm text-gray-800 border border-gray-300 overflow-x-auto whitespace-pre-wrap">
+            <code>{code}</code>
+          </pre>
+        )}
       </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t.selectCodeLang}
-        </label>
-        <select
-          value={codeLang}
-          onChange={(e) => setCodeLang(e.target.value)}
-          className="w-full border p-2 rounded"
-        >
-          {codeLanguages.map((lang) => (
-            <option key={lang} value={lang}>
-              {lang}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <textarea
-        rows={4}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder={t.placeholder}
-        className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-      <button
-        onClick={generateCode}
-        disabled={loading}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        {loading ? t.loading : t.button}
-      </button>
-
-      {code && (
-        <pre className="mt-6 bg-gray-100 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap text-gray-800 border border-gray-300">
-          <code>{code}</code>
-        </pre>
-      )}
     </div>
   );
 }

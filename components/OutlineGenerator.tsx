@@ -2,7 +2,23 @@
 
 import React, { useState } from 'react';
 
-const languages = [
+type LanguageItem = {
+  code: string;
+  label: string;
+};
+
+type I18nText = {
+  title: string;
+  placeholder: string;
+  selectLanguage: string;
+  button: string;
+  loading: string;
+  errorEmpty: string;
+  errorFail: string;
+  errorCall: string;
+};
+
+const languages: LanguageItem[] = [
   { code: 'zh-CN', label: '简体中文' },
   { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
@@ -10,7 +26,7 @@ const languages = [
   { code: 'es', label: 'Español' },
 ];
 
-const i18n = {
+const i18n: Record<string, I18nText> = {
   'zh-CN': {
     title: 'AI 内容运营文章生成器',
     placeholder: '请输入文章标题，例如：如何快速做副业',
@@ -72,7 +88,7 @@ function OutlineGenerator() {
 
   const t = i18n[language];
 
-  const getPromptByLanguage = (lang, title) => {
+  const getPromptByLanguage = (lang: string, title: string): string => {
     switch (lang) {
       case 'en':
         return `You are a professional content marketer and writer. Based on the given title, write a complete, engaging, SEO-optimized article with a clear introduction, structured body sections with subheadings, and a conclusion. Use a friendly and informative tone.
@@ -143,45 +159,51 @@ Título: ${title}`;
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="border rounded px-2 py-1 text-sm"
-        >
-          {languages.map((lang) => (
-            <option key={lang.code} value={lang.code}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <textarea
-        rows={3}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder={t.placeholder}
-        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-      />
-
-      {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
-
-      <button
-        onClick={generateArticle}
-        disabled={loading}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        {loading ? t.loading : t.button}
-      </button>
-
-      {article && (
-        <div className="mt-6 whitespace-pre-wrap bg-gray-50 p-4 rounded border border-gray-200 text-gray-800 prose prose-sm max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: article.replace(/\n/g, '<br />') }} />
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <h1 className="text-xl font-bold text-gray-800">{t.title}</h1>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 text-sm"
+          >
+            {languages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+
+        <textarea
+          rows={3}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={t.placeholder}
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+        />
+
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <button
+          onClick={generateArticle}
+          disabled={loading}
+          className="mt-4 w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition text-sm"
+        >
+          {loading ? t.loading : t.button}
+        </button>
+
+        {article && (
+          <div className="mt-6 bg-gray-50 p-4 rounded border border-gray-200 text-gray-800 text-sm overflow-x-auto whitespace-pre-wrap">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: article.replace(/\n/g, '<br />'),
+              }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
